@@ -612,7 +612,7 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
                 ? const CircleAvatar(
                     backgroundColor: TG.accent,
                     child: Icon(Icons.check_rounded, color: Colors.black))
-                : Thumb(e),
+                : FileThumb(e),
             title: Text(e.name, maxLines: 1, overflow: TextOverflow.ellipsis),
             subtitle: Text(
               e.isDir ? fmtDate(e.modified) : '${fmtSize(e.size)}  ·  ${fmtDate(e.modified)}',
@@ -651,7 +651,7 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
                 ),
                 padding: const EdgeInsets.all(6),
                 child: Column(children: [
-                  Expanded(child: Center(child: Thumb(e, size: 64))),
+                  Expanded(child: Center(child: FileThumb(e, size: 64))),
                   const SizedBox(height: 4),
                   Text(e.name,
                       maxLines: 2,
@@ -706,10 +706,10 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
 }
 
 /// Miniatura: foto de verdade para imagens, ícone para o resto.
-class Thumb extends StatelessWidget {
+class FileThumb extends StatelessWidget {
   final Entry e;
   final double size;
-  const Thumb(this.e, {super.key, this.size = 44});
+  const FileThumb(this.e, {super.key, this.size = 44});
 
   @override
   Widget build(BuildContext context) {

@@ -266,7 +266,7 @@ class _PickListState extends State<PickList> {
                       () => v == true ? _sel.add(f.path) : _sel.remove(f.path)),
                   secondary: GestureDetector(
                     onTap: () => openFile(context, f.path),
-                    child: Thumb(Entry(f.path, false, f.size, f.modified)),
+                    child: FileThumb(Entry(f.path, false, f.size, f.modified)),
                   ),
                   title: Text(f.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                   subtitle: Text(
@@ -399,7 +399,7 @@ class _DuplicatesPageState extends State<DuplicatesPage> {
                                   : _sel.remove(g[j].path)),
                               secondary: GestureDetector(
                                 onTap: () => openFile(context, g[j].path),
-                                child: Thumb(Entry(g[j].path, false, g[j].size, g[j].modified),
+                                child: FileThumb(Entry(g[j].path, false, g[j].size, g[j].modified),
                                     size: 40),
                               ),
                               title: Text(g[j].name,

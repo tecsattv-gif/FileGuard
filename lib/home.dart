@@ -353,7 +353,7 @@ class _CategoryPageState extends State<CategoryPage> {
                           ? const CircleAvatar(
                               backgroundColor: TG.accent,
                               child: Icon(Icons.check_rounded, color: Colors.black))
-                          : Thumb(e),
+                          : FileThumb(e),
                       title: Text(f.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                       subtitle: Text(
                           '${fmtSize(f.size)}  ·  ${parentOf(f.path).replaceFirst(Native.internal, '')}',
