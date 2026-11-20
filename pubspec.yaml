@@ -1,0 +1,29 @@
+name: fileguard
+description: FileGuard - gerenciador de arquivos para Android (pastas, ZIP, visualizador e limpeza).
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2
+  shared_preferences: ^2.3.2
+  share_plus: ^11.0.0
+  package_info_plus: ^8.0.0
+  open_filex: ^4.5.0
+  video_player: ^2.9.2
+  archive: '>=3.6.1 <4.0.0'
+  crypto: ^3.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon.png
