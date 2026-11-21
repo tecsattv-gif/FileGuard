@@ -55,6 +55,7 @@ Para a Release sair assinada sempre com a mesma chave (e o Android aceitar atual
 
 ## Versões
 
+- **1.0.1**: Componentes com tema completo pelo **FlexColorScheme** (pacote `flex_color_scheme`, open source, MIT): botões, interruptores, chips, menus, caixas de seleção e campos dos diálogos seguem as cores do app, com cantos arredondados iguais e efeitos de toque. O visual das telas não muda. Código: `TG.theme()` em `lib/theme.dart`.
 - **1.0.0**: primeira versão (pastas, copiar/mover, ZIP, visualizador, categorias, Lixeira, Limpeza, favoritos, backup e atualização pelo app).
 
 Criado por Luiz Alberto Cardoso (tecsattv@gmail.com).

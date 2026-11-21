@@ -1,3 +1,4 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
 import 'fs.dart';
@@ -20,9 +21,22 @@ class TG {
       seedColor: accent,
       brightness: Brightness.dark,
     ).copyWith(surface: surface, primary: accent);
-    return ThemeData(
+    // 1.0.1: FlexColorScheme dá tema completo a todos os componentes do
+    // Material (botões, interruptores, chips, menus, caixas de seleção...).
+    // Os temas próprios abaixo continuam a valer por cima.
+    final base = FlexThemeData.dark(
+      colorScheme: scheme,
+      scaffoldBackground: bg,
       useMaterial3: true,
-      brightness: Brightness.dark,
+      subThemesData: const FlexSubThemesData(
+        defaultRadius: 16,
+        interactionEffects: true,
+        tintedDisabledControls: true,
+        alignedDropdown: true,
+        useInputDecoratorThemeInDialogs: true,
+      ),
+    );
+    return base.copyWith(
       colorScheme: scheme,
       scaffoldBackgroundColor: bg,
       appBarTheme: const AppBarTheme(
