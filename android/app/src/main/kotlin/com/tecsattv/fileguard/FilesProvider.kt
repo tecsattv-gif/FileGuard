@@ -54,7 +54,7 @@ class FilesProvider : ContentProvider() {
         val f = fileOf(uri)
         val cols = projection ?: arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE)
         val c = MatrixCursor(cols)
-        val row = cols.map {
+        val row: List<Any?> = cols.map<String, Any?> {
             when (it) {
                 OpenableColumns.DISPLAY_NAME -> f.name
                 OpenableColumns.SIZE -> f.length()
@@ -63,7 +63,7 @@ class FilesProvider : ContentProvider() {
                 else -> null
             }
         }
-        c.addRow(row.toTypedArray())
+        c.addRow(row.toTypedArray<Any?>())
         return c
     }
 
