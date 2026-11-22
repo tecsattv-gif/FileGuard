@@ -38,6 +38,8 @@ O APK mais novo fica em [Releases](https://github.com/tecsattv-gif/FileGuard/rel
   - o tamanho da **Lixeira**.
   
   O que se apaga na Limpeza sai **de vez** (não passa pela Lixeira), porque o objetivo é liberar espaço. O app sempre pede confirmação antes.
+- **Escolher arquivos para outros apps**: quando um app (WhatsApp, Gmail, navegador, etc.) pede um arquivo para anexar ou enviar, o **FileGuard aparece como opção**. Ele abre o seletor próprio: armazenamento interno, cartão SD, atalhos e favoritos. Só aparecem os arquivos do tipo que o app pediu (fotos, PDF…); o botão de funil mostra todos. Toque num arquivo para entregar. Se o app aceitar vários, faça um toque longo no primeiro, toque nos outros e depois em **Escolher**. O outro app recebe só os arquivos escolhidos e só para leitura.
+- **FileGuard no seletor do Android**: na tela de arquivos do próprio Android (a que muitos apps abrem para anexar ou salvar), o FileGuard aparece no menu lateral (☰), com o armazenamento interno e o cartão SD. Dali dá também para salvar, criar pastas, renomear e apagar.
 - **Telefone e tablet, em pé ou deitado**: com o telefone deitado ou no tablet o menu fica na lateral, e a grade mostra mais colunas.
 - **Backup**: salvar os ajustes e favoritos em *Download/FileGuard/fileguard-backup.json* (o novo substitui o anterior), compartilhar o backup e restaurar.
 - **Atualização pelo app**: avisa quando há versão nova; *Ajustes → Procurar atualização* procura na hora.
@@ -55,6 +57,7 @@ Para a Release sair assinada sempre com a mesma chave (e o Android aceitar atual
 
 ## Versões
 
+- **1.1.0**: o FileGuard aparece como opção quando outro app pede um arquivo (seletor próprio, com filtro pelo tipo pedido e escolha de vários) e no menu lateral do seletor de arquivos do Android.
 - **1.0.1**: Componentes com tema completo pelo **FlexColorScheme** (pacote `flex_color_scheme`, open source, MIT): botões, interruptores, chips, menus, caixas de seleção e campos dos diálogos seguem as cores do app, com cantos arredondados iguais e efeitos de toque. O visual das telas não muda. Código: `TG.theme()` em `lib/theme.dart`.
 - **1.0.0**: primeira versão (pastas, copiar/mover, ZIP, visualizador, categorias, Lixeira, Limpeza, favoritos, backup e atualização pelo app).
 

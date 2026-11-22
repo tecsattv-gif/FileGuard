@@ -13,6 +13,16 @@ class Volume {
   String get name => removable ? 'Cartão SD' : 'Armazenamento interno';
 }
 
+/// Outro app pediu para escolher arquivo(s): tipos aceitos e se pode vários.
+class PickRequest {
+  final List<String> mimes;
+  final bool multiple;
+  const PickRequest(this.mimes, this.multiple);
+
+  /// "*/*" = qualquer arquivo.
+  bool get any => mimes.any((m) => m.trim() == '*/*' || m.trim() == '*');
+}
+
 /// Ponte com o Android (MainActivity.kt).
 class Native {
   static const _ch = MethodChannel('fileguard/native');
@@ -91,6 +101,33 @@ class Native {
     if (paths.isEmpty) return;
     try {
       await _ch.invokeMethod('scan', {'paths': paths});
+    } catch (_) {}
+  }
+
+  /// Pedido de outro app para escolher arquivo (null = app aberto normal).
+  static Future<PickRequest?> pickRequest() async {
+    try {
+      final m = await _ch.invokeMapMethod<String, dynamic>('pickRequest');
+      if (m == null) return null;
+      final mimes = ((m['mimes'] as List?) ?? const ['*/*'])
+          .map((e) => e.toString())
+          .toList();
+      return PickRequest(mimes, m['multiple'] == true);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Entrega os arquivos escolhidos ao outro app e fecha o seletor.
+  static Future<void> pickResult(List<String> paths) async {
+    try {
+      await _ch.invokeMethod('pickResult', {'paths': paths});
+    } catch (_) {}
+  }
+
+  static Future<void> pickCancel() async {
+    try {
+      await _ch.invokeMethod('pickCancel');
     } catch (_) {}
   }
 

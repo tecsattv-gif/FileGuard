@@ -20,12 +20,17 @@ class BrowserPage extends StatefulWidget {
   final String? root;
   final bool embedded;
   final String? pickExt;
+
+  /// Outro app pediu um arquivo: [pick] diz os tipos aceitos e se pode
+  /// escolher vários.
+  final PickRequest? pick;
   const BrowserPage(
       {super.key,
       required this.start,
       this.root,
       this.embedded = false,
-      this.pickExt});
+      this.pickExt,
+      this.pick});
 
   @override
   State<BrowserPage> createState() => BrowserPageState();
@@ -45,7 +50,28 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
   List<String>? _deep; // resultados da busca em subpastas
   bool _deepLoading = false;
 
-  bool get _picking => widget.pickExt != null;
+  bool get _picking => widget.pickExt != null || widget.pick != null;
+  bool get _multi => widget.pick?.multiple ?? false;
+
+  /// No seletor: mostra também arquivos de outros tipos (o outro app decide).
+  bool _showAll = false;
+
+  bool _accepts(String path) {
+    if (widget.pickExt != null) return extOf(path) == widget.pickExt;
+    final p = widget.pick;
+    if (p == null) return true;
+    return _showAll || p.any || mimeMatches(path, p.mimes);
+  }
+
+  void _deliver(List<String> paths) {
+    if (widget.pick != null) {
+      final files = paths.where(FileSystemEntity.isFileSync).toList();
+      if (files.isEmpty) return;
+      Native.pickResult(files);
+    } else {
+      Navigator.pop(context, paths.first);
+    }
+  }
 
   static String _guessRoot(String p) {
     for (final r in Native.roots) {
@@ -147,10 +173,10 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
       return;
     }
     if (_picking) {
-      if (extOf(e.path) == widget.pickExt) {
-        Navigator.pop(context, e.path);
+      if (_accepts(e.path)) {
+        _deliver([e.path]);
       } else {
-        snack(context, 'Escolha um arquivo .${widget.pickExt}');
+        snack(context, 'Este tipo de arquivo não serve para o app que pediu.');
       }
       return;
     }
@@ -160,7 +186,8 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
   }
 
   void _toggle(Entry e) {
-    if (_picking) return;
+    // No seletor só se marcam vários arquivos quando o outro app aceita.
+    if (_picking && (!_multi || e.isDir || !_accepts(e.path))) return;
     setState(() {
       if (!_sel.remove(e.path)) _sel.add(e.path);
     });
@@ -193,7 +220,7 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
       l = l.where((e) => e.name.toLowerCase().contains(q)).toList();
     }
     if (_picking) {
-      l = l.where((e) => e.isDir || extOf(e.path) == widget.pickExt).toList();
+      l = l.where((e) => e.isDir || _accepts(e.path)).toList();
     }
     return l;
   }
@@ -401,7 +428,7 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
         ],
       );
     }
-    final title = _picking
+    final title = widget.pickExt != null
         ? 'Escolha o arquivo .${widget.pickExt}'
         : (_path == _root ? _rootName() : baseName(_path));
     return AppBar(
@@ -411,6 +438,13 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
           : null,
       title: Text(title, overflow: TextOverflow.ellipsis),
       actions: [
+        if (widget.pick != null && !widget.pick!.any)
+          IconButton(
+            tooltip: _showAll ? 'Só os tipos pedidos' : 'Mostrar todos os arquivos',
+            icon: Icon(_showAll ? Icons.filter_alt_off_rounded : Icons.filter_alt_rounded,
+                color: _showAll ? TG.muted : TG.accent),
+            onPressed: () => setState(() => _showAll = !_showAll),
+          ),
         IconButton(
           tooltip: 'Buscar',
           icon: const Icon(Icons.search_rounded),
@@ -439,13 +473,29 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
           IconButton(
             tooltip: 'Selecionar tudo',
             icon: const Icon(Icons.select_all_rounded),
-            onPressed: () => setState(() => _sel.addAll(_visible.map((e) => e.path))),
+            onPressed: () => setState(() => _sel.addAll(_visible
+                .where((e) => !_picking || (!e.isDir && _accepts(e.path)))
+                .map((e) => e.path))),
           ),
         ],
       );
 
   Widget _selectionActions() {
     final sel = _selected;
+    if (_picking) {
+      return SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+            onPressed: () => _deliver(sel),
+            icon: const Icon(Icons.check_rounded),
+            label: Text('Escolher ${sel.length} ${sel.length == 1 ? 'arquivo' : 'arquivos'}'),
+          ),
+        ),
+      );
+    }
     final hasDir = sel.any((p) => FileSystemEntity.isDirectorySync(p));
     Widget b(IconData ic, String label, VoidCallback onTap, {Color? color}) => Expanded(
           child: InkWell(
@@ -693,7 +743,7 @@ class BrowserPageState extends State<BrowserPage> with WidgetsBindingObserver {
             if (isDir) {
               go(p);
             } else if (_picking) {
-              if (extOf(p) == widget.pickExt) Navigator.pop(context, p);
+              if (_accepts(p)) _deliver([p]);
             } else {
               openFile(context, p, changed: _reload);
             }

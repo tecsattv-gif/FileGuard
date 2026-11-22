@@ -9,6 +9,7 @@ import 'cleanup.dart';
 import 'fs.dart';
 import 'home.dart';
 import 'native.dart';
+import 'picker.dart';
 import 'prefs.dart';
 import 'settings.dart';
 import 'theme.dart';
@@ -17,6 +18,13 @@ import 'update_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Prefs.load();
+  // Aberto por outro app para escolher arquivo? Então só o seletor.
+  final pick = await Native.pickRequest();
+  if (pick != null) {
+    await Native.volumes();
+    runApp(PickerApp(request: pick));
+    return;
+  }
   runApp(const FileGuardApp());
 }
 

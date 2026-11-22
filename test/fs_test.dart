@@ -41,6 +41,17 @@ void main() {
     expect(newerVersion('1.0.0', '1.2.0'), isFalse);
   });
 
+  test('tipos pedidos por outros apps (MIME)', () {
+    expect(mimeOf('foto.JPG'), 'image/jpeg');
+    expect(mimeOf('x.qqq'), 'application/octet-stream');
+    expect(mimeMatches('foto.jpg', ['*/*']), isTrue);
+    expect(mimeMatches('foto.jpg', ['image/*']), isTrue);
+    expect(mimeMatches('doc.pdf', ['image/*']), isFalse);
+    expect(mimeMatches('doc.pdf', ['image/*', 'application/pdf']), isTrue);
+    expect(mimeMatches('musica.mp3', ['audio/*']), isTrue);
+    expect(mimeMatches('x.qqq', ['application/octet-stream']), isTrue);
+  });
+
   test('nomes válidos', () {
     expect(validName('Fotos 2026'), isTrue);
     expect(validName('a/b'), isFalse);

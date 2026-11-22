@@ -33,7 +33,43 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Aparece como opção quando outro app pede um arquivo -->
+            <intent-filter android:label="FileGuard">
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.OPENABLE" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter android:label="FileGuard">
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter android:label="FileGuard">
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
         </activity>
+
+        <!-- Entrega o arquivo escolhido para o outro app (só leitura) -->
+        <provider
+            android:name=".FilesProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
+        <!-- "FileGuard" no menu do seletor de arquivos do Android -->
+        <provider
+            android:name=".DocsProvider"
+            android:authorities="${applicationId}.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

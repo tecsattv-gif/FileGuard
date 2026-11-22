@@ -1,6 +1,7 @@
 package com.tecsattv.fileguard
 
 import android.Manifest
+import android.content.ClipData
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -11,7 +12,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.ParcelFileDescriptor
-import android.os.StatFs
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -47,6 +47,16 @@ class MainActivity : FlutterActivity() {
                             result.success(true)
                         }
                         "sdk" -> result.success(Build.VERSION.SDK_INT)
+                        "pickRequest" -> result.success(pickRequest())
+                        "pickResult" -> {
+                            pickResult(call.argument<List<String>>("paths") ?: emptyList())
+                            result.success(true)
+                        }
+                        "pickCancel" -> {
+                            setResult(RESULT_CANCELED)
+                            finish()
+                            result.success(true)
+                        }
                         "scan" -> {
                             // Avisa a Galeria/Música que arquivos mudaram.
                             val paths = call.argument<List<String>>("paths") ?: emptyList()
@@ -112,37 +122,45 @@ class MainActivity : FlutterActivity() {
     }
 
     /// Armazenamento interno + cartões SD/USB, com espaço total e livre.
-    private fun volumes(): List<Map<String, Any>> {
-        val list = mutableListOf<Map<String, Any>>()
-        val seen = mutableSetOf<String>()
-        fun add(root: File, removable: Boolean) {
-            val p = root.absolutePath
-            if (!seen.add(p) || !root.exists()) return
-            try {
-                val s = StatFs(p)
-                list.add(
-                    mapOf(
-                        "path" to p,
-                        "removable" to removable,
-                        "total" to s.totalBytes,
-                        "free" to s.availableBytes
-                    )
-                )
-            } catch (_: Exception) {}
+    private fun volumes(): List<Map<String, Any>> = Storage.volumes(this).map {
+        mapOf(
+            "path" to it.path,
+            "removable" to it.removable,
+            "total" to it.total,
+            "free" to it.free
+        )
+    }
+
+    /// Outro app pediu um arquivo (anexar, enviar, abrir…)? Devolve os tipos
+    /// pedidos e se pode escolher vários; null = o app foi aberto normalmente.
+    private fun pickRequest(): Map<String, Any>? {
+        val i = intent ?: return null
+        if (i.action != Intent.ACTION_GET_CONTENT && i.action != Intent.ACTION_PICK) return null
+        val mimes = mutableListOf<String>()
+        i.getStringArrayExtra(Intent.EXTRA_MIME_TYPES)?.let { a -> mimes.addAll(a.filterNotNull()) }
+        if (mimes.isEmpty()) mimes.add(i.type ?: "*/*")
+        return mapOf(
+            "mimes" to mimes,
+            "multiple" to i.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+        )
+    }
+
+    /// Entrega os arquivos escolhidos para o app que pediu e fecha o seletor.
+    private fun pickResult(paths: List<String>) {
+        val uris = paths.map { FilesProvider.uriFor(this, File(it)) }
+        if (uris.isEmpty()) {
+            setResult(RESULT_CANCELED)
+            finish()
+            return
         }
-        add(Environment.getExternalStorageDirectory(), false)
-        // getExternalFilesDirs: .../Android/data/<app>/files em cada volume;
-        // subindo 4 pastas chega à raiz do cartão.
-        for (d in getExternalFilesDirs(null)) {
-            if (d == null) continue
-            var root: File? = d
-            repeat(4) { root = root?.parentFile }
-            val r = root ?: continue
-            if (r.absolutePath != Environment.getExternalStorageDirectory().absolutePath) {
-                add(r, true)
-            }
-        }
-        return list
+        val data = Intent()
+        data.data = uris[0]
+        val clip = ClipData.newRawUri(null, uris[0])
+        for (u in uris.drop(1)) clip.addItem(ClipData.Item(u))
+        data.clipData = clip
+        data.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        setResult(RESULT_OK, data)
+        finish()
     }
 
     private fun hasAccess(): Boolean {

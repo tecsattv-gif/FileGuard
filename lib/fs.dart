@@ -436,3 +436,65 @@ bool newerVersion(String a, String b) {
   }
   return false;
 }
+
+// ---------------------------------------------------------------- Tipos MIME
+
+/// Tipo MIME pela extensão (o que os outros apps pedem: "image/*",
+/// "application/pdf"…).
+const _mimes = {
+  'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png',
+  'gif': 'image/gif', 'webp': 'image/webp', 'bmp': 'image/bmp',
+  'heic': 'image/heic', 'heif': 'image/heif',
+  'mp4': 'video/mp4', 'mkv': 'video/x-matroska', 'avi': 'video/x-msvideo',
+  'mov': 'video/quicktime', '3gp': 'video/3gpp', 'webm': 'video/webm',
+  'm4v': 'video/mp4', 'ts': 'video/mp2t', 'wmv': 'video/x-ms-wmv',
+  'flv': 'video/x-flv',
+  'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'ogg': 'audio/ogg',
+  'm4a': 'audio/mp4', 'aac': 'audio/aac', 'flac': 'audio/flac',
+  'opus': 'audio/opus', 'amr': 'audio/amr', 'wma': 'audio/x-ms-wma',
+  'mid': 'audio/midi',
+  'pdf': 'application/pdf',
+  'txt': 'text/plain', 'log': 'text/plain', 'csv': 'text/csv',
+  'md': 'text/markdown', 'html': 'text/html', 'htm': 'text/html',
+  'css': 'text/css', 'srt': 'text/plain', 'vtt': 'text/vtt',
+  'ini': 'text/plain', 'cfg': 'text/plain', 'conf': 'text/plain',
+  'json': 'application/json', 'xml': 'text/xml', 'js': 'text/javascript',
+  'gpx': 'application/gpx+xml', 'kml': 'application/vnd.google-earth.kml+xml',
+  'm3u': 'audio/x-mpegurl', 'm3u8': 'application/vnd.apple.mpegurl',
+  'doc': 'application/msword',
+  'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'xls': 'application/vnd.ms-excel',
+  'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'ppt': 'application/vnd.ms-powerpoint',
+  'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'odt': 'application/vnd.oasis.opendocument.text',
+  'ods': 'application/vnd.oasis.opendocument.spreadsheet',
+  'rtf': 'application/rtf', 'epub': 'application/epub+zip',
+  'zip': 'application/zip', 'rar': 'application/vnd.rar',
+  '7z': 'application/x-7z-compressed', 'tar': 'application/x-tar',
+  'gz': 'application/gzip', 'tgz': 'application/gzip',
+  'apk': 'application/vnd.android.package-archive',
+  'vcf': 'text/x-vcard', 'ics': 'text/calendar',
+};
+
+String mimeOf(String path) => _mimes[extOf(path)] ?? 'application/octet-stream';
+
+/// O arquivo serve para o que o outro app pediu? ("*/*", "image/*",
+/// "application/pdf"…). Tipos desconhecidos só entram em "*/*" e
+/// "application/*" / "application/octet-stream".
+bool mimeMatches(String path, List<String> wanted) {
+  if (wanted.isEmpty) return true;
+  final m = mimeOf(path);
+  for (final w0 in wanted) {
+    final w = w0.trim().toLowerCase();
+    if (w.isEmpty || w == '*/*' || w == '*') return true;
+    if (w == m) return true;
+    if (w.endsWith('/*') && m.startsWith(w.substring(0, w.length - 1))) {
+      return true;
+    }
+    if (m == 'application/octet-stream' && w == 'application/octet-stream') {
+      return true;
+    }
+  }
+  return false;
+}
